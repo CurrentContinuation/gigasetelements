@@ -3,7 +3,7 @@ Gigasetelements Java API
 
 A small Java project to connect to a Gigasetelements base station. 
 
-Inspired by the Python command line version that can be find under ...
+Inspired by the Python command line version that can be find under https://github.com/dynasticorpheus/gigaset-elements
 
 The first release can simply query the status of the base, the sensors and list the events. The base status can also be changed. Basic Listeners can be registered. No cron actions functionalities have bene added.
 
