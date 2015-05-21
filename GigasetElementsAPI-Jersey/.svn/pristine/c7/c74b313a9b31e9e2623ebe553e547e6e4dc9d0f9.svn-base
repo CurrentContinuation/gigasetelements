@@ -1,0 +1,5 @@
+package com.cc.gigaset;
+
+public enum Mode {
+    AWAY, HOME, CUSTOM;
+}

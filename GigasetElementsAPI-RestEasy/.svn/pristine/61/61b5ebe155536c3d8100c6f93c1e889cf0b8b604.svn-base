@@ -1,0 +1,200 @@
+package com.cc.gigaset.test;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.util.Map;
+import java.util.Properties;
+
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.Cookie;
+import javax.ws.rs.core.Form;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.NewCookie;
+import javax.ws.rs.core.Response;
+
+import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+
+import com.cc.gigaset.GigasetElements;
+import com.cc.gigaset.GigasetElementsService;
+import com.cc.gigaset.common.Base;
+import com.cc.gigaset.common.JsonToMapImpl;
+import com.cc.gigaset.common.MapVisitor;
+import com.cc.gigaset.common.Mode;
+
+public class GigasetElementsTest
+	extends JsonToMapImpl {
+
+    private static final String EC1 = "--------------------------------------------------------------------------------------------------------------------------------";
+    private static final String EC2 = EC1.replace("-", "#");
+    // url01
+    private static final String url01 = "https://im.gigaset-elements.de";
+    private static final String urlIdentity = "identity/api/v1/user/login";
+    // url02
+    private static final String url02 = "https://api.gigaset-elements.de";
+    private static final String urlAuth = "api/v1/auth/openid/begin";// +?op=gigaset
+    private static final String urlBase = "api/v1/me/basestations";
+    private static final String urlEvents = "api/v1/me/events";// ?limit=1
+    @SuppressWarnings("unused")
+    private static final String urlCamera = "api/v1/me/cameras";
+    // username & password
+    private static String username = "your.email@somewhere.com";
+    private static String password = "thisismysecretpassword";
+
+    @Before
+    public void loadCredentials() throws Exception {
+	Properties props = new Properties();
+	File file = new File("gigasetelements.properties");
+	Assert.assertTrue(file.exists());
+	props.load(new FileInputStream(file));
+	username = props.getProperty("username");
+	password = props.getProperty("password");
+    }
+
+    @Test
+    public void test() throws Exception {
+	GigasetElements service = new GigasetElementsService(username, password);
+	Base base = service.setEventsCount(100).getBase();
+	Mode mode = base.getMode();
+	service.setMode(base, Mode.CUSTOM);
+	service.setMode(base, mode);
+    }
+
+    @Test
+    public void testGigaset() throws Exception {
+	Client client = ClientBuilder.newClient();
+	// client.register(FollowRedirectFilter.class);
+	// client.property(ClientProperties.CONNECT_TIMEOUT, 90000);
+	// client.property(ClientProperties.READ_TIMEOUT, 90000);
+	try {
+	    // ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+	    // MapVisitor
+	    // ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+	    MapVisitor visitor = new MapVisitor() {
+
+		@Override
+		public int getMaxLevel() {
+		    return Integer.MAX_VALUE;
+		}
+
+		@SuppressWarnings("unused")
+		public void onKeyValue(int level, String key, Object value) {
+		    String space = " ";
+		    for (int i = 0; i < level; i++) {
+			space = space + "   ";
+		    }
+		    System.out.println(level + space + key + " = " + value);
+		}
+	    };
+	    // ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+	    // urlIdentity
+	    // ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+	    ResteasyWebTarget tIdentity = (ResteasyWebTarget) client.target(url01).path(urlIdentity);
+	    // tIdentity.property(ClientProperties.FOLLOW_REDIRECTS, true);
+	    Form form = new Form();
+	    form.param("email", username);
+	    form.param("password", password);
+	    Response responseIdentity = tIdentity.request(MediaType.APPLICATION_JSON_TYPE).post(Entity.entity(form, MediaType.APPLICATION_FORM_URLENCODED_TYPE));
+	    report(responseIdentity);
+	    Assert.assertEquals(200, responseIdentity.getStatus());
+	    String entityIdentity = responseIdentity.readEntity(String.class);
+	    Map<String, Object> mapIdentity = jsonToMap(entityIdentity);
+	    System.out.println("--> " + mapIdentity);
+	    System.out.println(EC2 + EC2 + EC2);
+	    visit(mapIdentity, visitor);
+	    // ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+	    // urlAuth
+	    // ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+	    ResteasyWebTarget targetAuth = (ResteasyWebTarget) client.target(url02).path(urlAuth).queryParam("op", "gigaset");
+	    // targetAuth.property(ClientProperties.FOLLOW_REDIRECTS, true);
+	    Response responseAuth = targetAuth.request(MediaType.TEXT_PLAIN_TYPE).cookie(getCookie(responseIdentity)).get();
+	    report(responseAuth);
+	    Assert.assertEquals(200, responseAuth.getStatus());
+	    String entityAuth = responseAuth.readEntity(String.class);
+	    System.out.println("--> " + entityAuth);// not JSON!
+	    // ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+	    // authorization
+	    // ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+	    Cookie authorization = getCookie(responseAuth);
+	    // ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+	    // urlBase
+	    // ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+	    WebTarget targetBase = client.target(url02).path(urlBase);
+	    // targetBase.property(ClientProperties.FOLLOW_REDIRECTS, true);
+	    Response responseBase = targetBase.request(MediaType.APPLICATION_JSON_TYPE).cookie(authorization).get();
+	    report(responseBase);
+	    Assert.assertEquals(200, responseBase.getStatus());
+	    String entityBase = responseBase.readEntity(String.class);
+	    // System.out.println("--> " + entityBase);
+	    Map<String, Object> mapBase = jsonToMap(entityBase);
+	    System.out.println("--> " + mapBase);
+	    System.out.println(EC2 + EC2 + EC2);
+	    visit(mapBase, visitor);
+	    // ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+	    // urlEvents
+	    // ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+	    WebTarget targetEvents = client.target(url02).path(urlEvents).queryParam("limit", "20");
+	    // targetEvents.property(ClientProperties.FOLLOW_REDIRECTS, true);
+	    Response responseEvents = targetEvents.request(MediaType.APPLICATION_JSON_TYPE).cookie(authorization).get();
+	    report(responseEvents);
+	    Assert.assertEquals(200, responseEvents.getStatus());
+	    String entityEvents = responseEvents.readEntity(String.class);
+	    // System.out.println("--> " + entityEvents);
+	    Map<String, Object> mapEvents = jsonToMap(entityEvents);
+	    System.out.println("--> " + mapEvents);
+	    System.out.println(EC2 + EC2 + EC2);
+	    visit(mapEvents, visitor);
+	    // ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+	    // Change Status!
+	    // ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+	} finally {
+	    client.close();
+	}
+    }
+
+    private Cookie getCookie(Response response) {
+	for (String key : response.getCookies().keySet()) {
+	    return response.getCookies().get(key);
+	}
+	return null;
+    }
+
+    private void report(Response response) {
+	System.out.println();
+	System.out.println(EC2 + EC2 + EC2);
+	System.out.println(response);
+	System.out.println(EC2 + EC2 + EC2);
+	System.out.println("MediaType: " + response.getMediaType());
+	System.out.println(EC1 + EC1 + EC1);
+	if (!response.getHeaders().isEmpty()) {
+	    for (String key : response.getHeaders().keySet()) {
+		System.out.println(key + " " + response.getHeaders().get(key));
+	    }
+	} else {
+	    System.out.println("no Headers");
+	}
+	System.out.println(EC1 + EC1 + EC1);
+	if (!response.getCookies().isEmpty()) {
+	    for (String key : response.getCookies().keySet()) {
+		NewCookie cookie = response.getCookies().get(key);
+		System.out.println(key + " " + cookie);
+	    }
+	} else {
+	    System.out.println("no Cookies");
+	}
+	System.out.println(EC1 + EC1 + EC1);
+	if (!response.getAllowedMethods().isEmpty()) {
+	    for (String key : response.getAllowedMethods()) {
+		System.out.println(key);
+	    }
+	} else {
+	    System.out.println("no AllowedMethods");
+	}
+	System.out.println();
+    }
+}

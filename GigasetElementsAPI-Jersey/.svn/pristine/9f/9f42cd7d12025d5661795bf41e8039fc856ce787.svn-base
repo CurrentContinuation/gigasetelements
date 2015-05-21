@@ -1,0 +1,5 @@
+dependency:copy-dependencies
+
+jar:jar
+
+eclipse:eclipse
