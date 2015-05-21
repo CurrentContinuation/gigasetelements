@@ -59,7 +59,7 @@ You can also register some Listener to the GigasetElements service; they are app
 
 Wildfly Deployment
 ------------------------------------------------------------------------------------------
-In Wildfly you have to add the file jboss-deployment-structure.xml in the META-INF dir of the .ear or in the WEB-INF of the .war. The <b>GigasetElementsAPI-*.jar</b> and all dependency jars have to be added to the lib dir, all resteasy jars and the two http*.jar have to be excluded because they are already part of the Wildfly modules.
+In Wildfly you have to add the file jboss-deployment-structure.xml in the META-INF dir of the .ear or in the WEB-INF of the .war. The <b>GigasetElementsAPI-{version}.jar</b> and all dependency jars have to be added to the lib dir, all resteasy jars and the two http*.jar have to be excluded because they are already part of the Wildfly modules.
 
 ```xml
 <?xml version="1.0"?>
