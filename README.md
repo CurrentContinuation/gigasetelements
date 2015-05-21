@@ -34,7 +34,6 @@ The service method getBase() queries the status of your GigasetElements Base at 
 ```java
 GigasetElements service = new GigasetElementsRestEasy(username, password);
 Base base = service.setEventsCount(10).getBase();
-Mode mode = base.getMode();
 System.out.println(base.getAttributes());
 for (Sensor sensor : base.getSensors()) {
 	System.out.println(sensor.getAttributes());
