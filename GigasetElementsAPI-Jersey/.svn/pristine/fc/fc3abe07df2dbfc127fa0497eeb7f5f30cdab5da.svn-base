@@ -1,4 +1,0 @@
-package com.cc.gigaset;
-
-public interface Listener {
-}
