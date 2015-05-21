@@ -16,7 +16,7 @@ The needed dependencies are given in Maven. The minimal Java version is 1.7.
 
 There are two different implementations:
 
-- for Jersey          --> Glassfish
+- for Jersey 2.17     --> Glassfish 4
 - for RestEasy 3.0.10 --> Wildfly 8.2.0
 
 Both versions work as standalone application (see JUnit test) or can be deployed to the Application Server.
@@ -57,3 +57,19 @@ You can also register some Listener to the GigasetElements service; they are app
 - ModeListener
 - SensorListener
 
+Important Note: install in Wildfly
+------------------------------------------------------------------------------------------
+In Wildfly you have to add the file jboss-deployment-structure.xml in the META-INF dir of the .ear or in the WEB-INF of the .war; all resteasy jars and the two http*.jar have to be excluded, all others have to be added to the lib dir.
+
+```xml
+<?xml version="1.0"?>
+<jboss-deployment-structure xmlns="urn:jboss:deployment-structure:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	
+	<deployment>
+		<dependencies>
+			<module name="org.apache.httpcomponents" export="true" />
+		</dependencies>
+	</deployment>
+	
+</jboss-deployment-structure>
+```
