@@ -440,7 +440,7 @@ public abstract class GigasetElementsBase
 	    if (listener instanceof SensorEventListener) {
 		SensorEventListener casted = (SensorEventListener) listener;
 		for (Event event : base.getEvents()) {
-		    if (event.getSensor().equals(casted.getSensor())) {
+		    if (event.getSensor().getId().equals(casted.getSensor().getId())) {
 			casted.onEvent(event);
 		    }
 		}
