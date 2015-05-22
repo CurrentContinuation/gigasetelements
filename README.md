@@ -1,5 +1,5 @@
 # gigasetelements
-Gigasetelements Java API
+ Gigaset Elements Java REST API
 
 A small Java project to connect to a Gigasetelements base station. 
 
