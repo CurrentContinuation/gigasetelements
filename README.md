@@ -1,7 +1,9 @@
 Gigaset Elements Java REST API
 ------------------------------------------------------------------------------------------
 
-A small Java project to connect to a Gigasetelements base station. 
+A small Java project to connect to a Gigaset Elements base station: see
+
+https://www.gigaset.com/de_DE/home/intelligentes-wohnen.html
 
 Inspired by the Python command line version that can be find under 
 
